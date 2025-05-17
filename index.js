@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-require('dotenv').config() 
+require('dotenv').config()
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -32,23 +32,23 @@ async function run() {
 
         // get coffee data
 
-        app.get("/coffees", async(req, res) => {
+        app.get("/coffees", async (req, res) => {
             const result = await coffeesCollection.find().toArray();
             res.send(result)
         })
 
         // view details a single Coffee
 
-        app.get("/coffees/:id", async(req, res) => {
+        app.get("/coffees/:id", async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await coffeesCollection.findOne(query)
             res.send(result)
         })
 
 
         // coffee data post
-        app.post('/coffees', async(req, res) => {
+        app.post('/coffees', async (req, res) => {
             const newCoffee = req.body;
             console.log(newCoffee);
             const result = await coffeesCollection.insertOne(newCoffee)
@@ -56,9 +56,9 @@ async function run() {
         })
 
         // update or put coffee data
-        app.put('/coffees/:id', async(req, res) => {
-            const id = req. params.id;
-            const filter = {_id: new ObjectId(id)}
+        app.put('/coffees/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
 
             const updatedCoffee = req.body;
@@ -74,15 +74,34 @@ async function run() {
 
 
         // coffee data delete
-        app.delete('/coffees/:id', async(req, res) => {
+        app.delete('/coffees/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await coffeesCollection.deleteOne(query)
             res.send(result)
         })
 
         // user related APIs
-        app.post('/users', async(req, res) => {
+
+        //  get user data
+        app.get('/users', async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result)
+
+        })
+
+        // delete user data
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await usersCollection.deleteOne(query)
+            res.send(result)
+        })
+
+
+        // user details post in db
+        app.post('/users', async (req, res) => {
             const userProfile = req.body;
             console.log(userProfile);
 
@@ -90,6 +109,24 @@ async function run() {
 
             res.send(result)
         })
+
+        // patch signIn user
+        app.patch('/users', async (req, res) => {
+            console.log(req.body);
+            const { email, lastSignInTime } = req.body;
+            const filter = {email}
+
+            const updateDoc = {
+                $set: {
+                    lastSignInTime: lastSignInTime
+                }
+            }
+
+            const result = await usersCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+
 
 
         // Send a ping to confirm a successful connection
